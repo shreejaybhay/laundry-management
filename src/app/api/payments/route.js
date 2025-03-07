@@ -51,13 +51,13 @@ async function getPayments(req) {
         id: payment._id.toString(),
         amount: payment.amount.toString(),
         method: payment.method,
-        status: payment.status.toUpperCase(), // This is correct
+        status: payment.status.toUpperCase(),
         createdAt: payment.createdAt,
         orderDetails: payment.orderId ? {
           services: payment.orderId.services || [],
           weight: payment.orderId.weight,
           totalPrice: payment.orderId.totalPrice,
-          status: payment.orderId.status // Add order status
+          status: payment.orderId.status
         } : null
       };
     });
@@ -86,6 +86,13 @@ async function getPayments(req) {
 // POST: Process payment
 async function processPayment(req) {
   try {
+    // Ensure request has proper headers
+    if (!req.headers.get('content-type')?.includes('application/json')) {
+      return apiResponse({
+        error: 'Content-Type must be application/json'
+      }, { status: 400 });
+    }
+
     const data = await req.json();
     const { orderId, method } = data;
 
@@ -142,6 +149,7 @@ async function processPayment(req) {
       });
 
       return apiResponse({
+        success: true,
         message: 'COD payment registered successfully',
         payment: {
           id: payment._id,
@@ -149,12 +157,11 @@ async function processPayment(req) {
           method: payment.method,
           status: payment.status
         }
-      }, { status: 201 });
+      });
     }
 
     // Handle Online Payment (Stripe)
     if (paymentMethod === 'ONLINE') {
-      // Create Stripe session with absolute URLs
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
@@ -178,7 +185,6 @@ async function processPayment(req) {
         cancel_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/dashboard/orders/${order._id}?canceled=true`,
       });
 
-      // Create pending payment record
       const payment = await Payment.create({
         orderId: order._id,
         userId: req.user.id,
@@ -189,6 +195,7 @@ async function processPayment(req) {
       });
 
       return apiResponse({
+        success: true,
         message: 'Stripe session created successfully',
         payment: {
           id: payment._id,
@@ -230,3 +237,4 @@ async function handlePaymentSuccess(orderId, paymentId) {
 
 export const POST = auth(processPayment);
 export const GET = auth(getPayments);
+

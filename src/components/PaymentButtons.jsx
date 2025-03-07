@@ -10,82 +10,62 @@ const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
 export function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleCODPayment = async () => {
+  const handlePayment = async (method) => {
     try {
       setIsProcessing(true);
       const response = await fetch(`${BASE_URL}/api/payments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify({
           orderId,
-          method: 'COD',
-          amount: totalAmount
+          method
         })
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
 
-      toast.success('Cash on Delivery payment registered successfully');
-      if (onPaymentComplete) {
-        onPaymentComplete();
+      if (!response.ok) {
+        throw new Error(data.error || `Failed to process ${method} payment`);
+      }
+
+      if (method === 'COD') {
+        toast.success(data.message || 'Cash on Delivery payment registered successfully');
+        if (onPaymentComplete) onPaymentComplete();
+      } else if (method === 'ONLINE' && data.stripeSession?.url) {
+        window.location.href = data.stripeSession.url;
+      } else {
+        throw new Error('Invalid payment response');
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to register COD payment');
+      console.error('Payment error:', error);
+      toast.error(error.message || `Failed to process payment`);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleOnlinePayment = async () => {
-    try {
-      setIsProcessing(true);
-      const response = await fetch(`${BASE_URL}/api/payments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId,
-          method: 'ONLINE',
-          amount: totalAmount
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-
-      if (data.stripeSession?.url) {
-        window.location.href = data.stripeSession.url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error) {
-      toast.error(error.message || 'Failed to initiate online payment');
-      setIsProcessing(false);
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col sm:flex-row gap-2">
       <Button
-        variant="outline"
-        onClick={handleCODPayment}
+        onClick={() => handlePayment('COD')}
         disabled={isProcessing}
-        className="w-full h-auto py-4"
+        className="flex items-center gap-2"
+        variant="outline"
       >
-        <div className="flex flex-col items-center gap-1">
-          <Banknote className="h-5 w-5" />
-          <span>Pay with Cash on Delivery</span>
-        </div>
+        <Banknote className="w-4 h-4" />
+        Cash on Delivery
       </Button>
       <Button
-        onClick={handleOnlinePayment}
+        onClick={() => handlePayment('ONLINE')}
         disabled={isProcessing}
-        className="w-full h-auto py-4"
+        className="flex items-center gap-2"
       >
-        <div className="flex flex-col items-center gap-1">
-          <CreditCard className="h-5 w-5" />
-          <span>Pay Online</span>
-        </div>
+        <CreditCard className="w-4 h-4" />
+        Pay Online
       </Button>
     </div>
   );

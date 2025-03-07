@@ -12,12 +12,14 @@ export async function GET(req, { params }) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
+    // Find order by partial ID match
     const orders = await Order.find({
       createdAt: { $gte: thirtyDaysAgo }
     });
     
+    // Find order where ID ends with the provided ID
     const order = orders.find(order => 
-      order._id.toString().endsWith(id)
+      order._id.toString().toLowerCase().endsWith(id.toLowerCase())
     );
     
     if (!order) {

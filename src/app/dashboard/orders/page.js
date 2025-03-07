@@ -80,7 +80,7 @@ const formatPrice = (price) => {
 function formatRelativeTime(date) {
   const now = new Date();
   const diffInHours = (now - date) / (1000 * 60 * 60);
-  
+
   if (diffInHours < 24) {
     return `${Math.round(diffInHours)} hours ago`;
   } else if (diffInHours < 48) {
@@ -123,7 +123,7 @@ export default function OrdersPage() {
 
   const getStatusBadge = (status) => {
     const statusConfig = ORDER_STATUSES[status.toLowerCase()] || ORDER_STATUSES.pending;
-    
+
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig.color}`}>
         {statusConfig.label}
@@ -136,9 +136,9 @@ export default function OrdersPage() {
     try {
       const response = await fetch(`${BASE_URL}/api/auth/me`);
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       setUserRole(data.user.role);
     } catch (error) {
       console.error('Failed to fetch user role:', error);
@@ -196,11 +196,11 @@ export default function OrdersPage() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update order status');
       }
-      
+
       toast.success('Order status updated successfully');
       loadOrders(); // Refresh the orders list
     } catch (error) {
@@ -234,9 +234,9 @@ export default function OrdersPage() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error);
-      
+
       toast.success('Order created successfully');
       loadOrders(); // Refresh the orders list
       setIsCreateDialogOpen(false);
@@ -349,8 +349,8 @@ export default function OrdersPage() {
   // Update the UserActions component to match width
   const UserActions = ({ order }) => (
     <div className="flex justify-start">
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         size="sm"
         className="w-[160px] whitespace-nowrap"
         onClick={() => viewOrderDetails(order.id)}
@@ -369,7 +369,7 @@ export default function OrdersPage() {
       });
 
       if (!response.ok) throw new Error('Failed to cancel order');
-      
+
       toast.success('Order cancelled successfully');
       loadOrders();
     } catch (error) {
@@ -398,7 +398,7 @@ export default function OrdersPage() {
             {getStatusBadge(order.status)}
           </div>
         </div>
-        
+
         <div className="space-y-2 bg-white rounded-lg p-3 border border-blue-100/50">
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">Services</span>
@@ -407,9 +407,9 @@ export default function OrdersPage() {
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">Weight</span>
             <span className="text-sm font-medium">{order.services[0]?.weight}kg</span>
-          </div>  
+          </div>
         </div>
-        
+
         <div className="mt-4">
           {userRole === 'admin' ? (
             <AdminActions order={order} />
@@ -439,16 +439,16 @@ export default function OrdersPage() {
 
   if (showLoader || isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh]">
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)]">
         <WashingMachineLoader />
-        <p className="mt-4 text-muted-foreground animate-pulse">Loading orders...</p>
+        <p className="mt-4 text-muted-foreground">Loading orders...</p>
       </div>
     );
   }
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
-      <motion.div 
+      <motion.div
         initial="initial"
         animate="animate"
         variants={fadeIn}
@@ -464,7 +464,7 @@ export default function OrdersPage() {
               {userRole === 'admin' ? 'Manage and track all customer orders' : 'View and manage your orders'}
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             {userRole === 'user' && (
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -687,7 +687,7 @@ export default function OrdersPage() {
         {/* Mobile Cards View */}
         <div className="grid gap-3 md:hidden">
           {filteredOrders.map((order) => (
-            <div 
+            <div
               key={order.id}
               className="rounded-xl border bg-card shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
             >
@@ -715,7 +715,7 @@ export default function OrdersPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Details Section */}
               <div className="p-4 space-y-3">
                 <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
@@ -729,7 +729,7 @@ export default function OrdersPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -742,18 +742,18 @@ export default function OrdersPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Actions Section */}
               <div className="px-4 py-3 bg-muted/10 border-t">
                 <div className="flex gap-2">
                   {userRole === 'admin' ? (
-                    <AdminActions 
-                      order={order} 
+                    <AdminActions
+                      order={order}
                       className="w-full [&>button]:py-2.5 [&>button]:justify-center"
                     />
                   ) : (
-                    <UserActions 
-                      order={order} 
+                    <UserActions
+                      order={order}
                       className="w-full [&>button]:py-2.5 [&>button]:justify-center"
                     />
                   )}

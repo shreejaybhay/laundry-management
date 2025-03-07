@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -16,17 +16,55 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { WashingMachineLoader } from "@/components/ui/washing-machine-loader";
 import { motion } from "framer-motion";
+import { THEME_COLORS } from '@/constants/theme';
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
 
-// Add theme colors
-const THEME_COLORS = {
-  primary: '#0ea5e9',    // Blue
-  secondary: '#f59e0b',  // Yellow
-  tertiary: '#6366f1',   // Purple
-  success: '#10b981',    // Green
-  danger: '#f43f5e',     // Red
-  violet: '#8b5cf6',     // Violet
+const getStatusColor = (status) => {
+  const statusColors = {
+    'pending': {
+      bg: `${THEME_COLORS.secondary}15`,
+      text: THEME_COLORS.secondary,
+      icon: Clock
+    },
+    'paid': {
+      bg: `${THEME_COLORS.success}15`,
+      text: THEME_COLORS.success,
+      icon: CreditCard
+    },
+    'processing': {
+      bg: `${THEME_COLORS.primary}15`,
+      text: THEME_COLORS.primary,
+      icon: Clock
+    },
+    'completed': {
+      bg: `${THEME_COLORS.success}15`,
+      text: THEME_COLORS.success,
+      icon: CheckCircle2
+    },
+    'cancelled': {
+      bg: `${THEME_COLORS.danger}15`,
+      text: THEME_COLORS.danger,
+      icon: XCircle
+    },
+    'delivered': {
+      bg: `${THEME_COLORS.violet}15`,
+      text: THEME_COLORS.violet,
+      icon: Truck
+    }
+  };
+
+  return statusColors[status?.toLowerCase()] || {
+    bg: `${THEME_COLORS.secondary}15`,
+    text: THEME_COLORS.secondary,
+    icon: Info
+  };
+};
+
+const StatusIcon = ({ status, className }) => {
+  const statusConfig = getStatusColor(status);
+  const IconComponent = statusConfig.icon;
+  return <IconComponent className={className} style={{ color: statusConfig.text }} />;
 };
 
 export default function OrderDetailsPage() {
@@ -82,18 +120,6 @@ export default function OrderDetailsPage() {
     }
   }
 
-  const getStatusColor = (status) => {
-    const statusColors = {
-      'pending': `bg-[${THEME_COLORS.secondary}]15 text-[${THEME_COLORS.secondary}]`,
-      'paid': `bg-[${THEME_COLORS.success}]15 text-[${THEME_COLORS.success}]`,
-      'processing': `bg-[${THEME_COLORS.primary}]15 text-[${THEME_COLORS.primary}]`,
-      'completed': `bg-[${THEME_COLORS.success}]15 text-[${THEME_COLORS.success}]`,
-      'cancelled': `bg-[${THEME_COLORS.danger}]15 text-[${THEME_COLORS.danger}]`,
-      'delivered': `bg-[${THEME_COLORS.violet}]15 text-[${THEME_COLORS.violet}]`
-    };
-    return statusColors[status.toLowerCase()] || 'bg-gray-100 text-gray-800';
-  };
-
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -102,9 +128,9 @@ export default function OrderDetailsPage() {
 
   if (loading || showLoader) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
-        <WashingMachineLoader className={`text-[${THEME_COLORS.primary}]`} />
-        <p className="mt-8 text-muted-foreground">Loading order details...</p>
+<div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)]">
+        <WashingMachineLoader />
+        <p className="mt-4 text-muted-foreground">Loading orders details...</p>
       </div>
     );
   }
@@ -219,13 +245,13 @@ export default function OrderDetailsPage() {
                   </div>
                 </div>
                 <Badge
-                  variant="secondary"
-                  className={`px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium shadow-sm ${getStatusColor(order.status)}`}
+                  className="px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium shadow-sm"
+                  style={{
+                    backgroundColor: getStatusColor(order.status).bg,
+                    color: getStatusColor(order.status).text
+                  }}
                 >
-                  {order.status === 'processing' && <Clock className="w-4 h-4 animate-pulse" />}
-                  {order.status === 'completed' && <CheckCircle2 className="w-4 h-4" />}
-                  {order.status === 'delivered' && <Truck className="w-4 h-4" />}
-                  {order.status === 'cancelled' && <XCircle className="w-4 h-4" />}
+                  <StatusIcon status={order.status} className="w-4 h-4" />
                   {order.status.toUpperCase()}
                 </Badge>
               </div>
@@ -836,6 +862,38 @@ async function handleCashOnDelivery(orderId) {
 // Separate PaymentButtons component
 function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [existingPayment, setExistingPayment] = useState(null);
+
+  // Use existing endpoint to check payment status
+  useEffect(() => {
+    const checkExistingPayment = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/payments/${orderId}`);
+        const data = await response.json();
+        if (response.ok && data.payment) {
+          setExistingPayment(data.payment);
+        }
+      } catch (error) {
+        console.error('Error checking payment:', error);
+      }
+    };
+
+    checkExistingPayment();
+  }, [orderId]);
+
+  // If there's an existing COD payment, show a message instead of buttons
+  if (existingPayment && existingPayment.method === 'COD') {
+    return (
+      <div className="p-4 rounded-lg bg-muted/50 text-center">
+        <p className="text-muted-foreground">
+          Cash on Delivery payment has been registered for this order
+        </p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Payment will be collected upon delivery
+        </p>
+      </div>
+    );
+  }
 
   const handleCODPayment = async () => {
     try {
@@ -865,13 +923,14 @@ function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
   const handleOnlinePayment = async () => {
     try {
       setIsProcessing(true);
-      const response = await fetch(`${BASE_URL}/api/payments/stripe/create-session`, {
+      const response = await fetch(`${BASE_URL}/api/payments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           orderId,
+          method: 'ONLINE'
         }),
       });
 
