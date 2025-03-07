@@ -1,24 +1,247 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --chart-1: 221.2 83.2% 53.3%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary)/0.8);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary)) transparent;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add this after your existing CSS */
+
+.loader {
+  width: 120px;
+  height: 150px;
+  background-color: hsl(var(--background));
+  background-repeat: no-repeat;
+  background-image: linear-gradient(hsl(var(--muted)) 50%, hsl(var(--muted-foreground)) 51%),
+    linear-gradient(hsl(var(--muted)), hsl(var(--muted))),
+    linear-gradient(hsl(var(--muted)), hsl(var(--muted))),
+    radial-gradient(ellipse at center, hsl(var(--muted-foreground)) 25%, hsl(var(--muted)) 26%, hsl(var(--muted)) 50%, #0000 55%),
+    radial-gradient(ellipse at center, hsl(var(--muted-foreground)) 25%, hsl(var(--muted)) 26%, hsl(var(--muted)) 50%, #0000 55%),
+    radial-gradient(ellipse at center, hsl(var(--muted-foreground)) 25%, hsl(var(--muted)) 26%, hsl(var(--muted)) 50%, #0000 55%);
+  background-position: 0 20px, 45px 0, 8px 6px, 55px 3px, 75px 3px, 95px 3px;
+  background-size: 100% 4px, 1px 23px, 30px 8px, 15px 15px, 15px 15px, 15px 15px;
+  position: relative;
+  border-radius: 6%;
+  animation: shake 3s ease-in-out infinite;
+  transform-origin: 60px 180px;
+}
+
+.loader:before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 100%;
+  width: 7px;
+  height: 5px;
+  background: hsl(var(--muted-foreground));
+  border-radius: 0 0 4px 4px;
+  box-shadow: 102px 0 hsl(var(--muted-foreground));
+}
+
+.loader:after {
+  content: "";
+  position: absolute;
+  width: 95px;
+  height: 95px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  bottom: 20px;
+  background-color: hsl(var(--primary)/0.2);
+  background-image: linear-gradient(to right, hsl(var(--foreground)/0.2) 0%, hsl(var(--foreground)/0.2) 49%, transparent 50%, transparent 100%),
+    linear-gradient(135deg, hsl(var(--primary)) 50%, hsl(var(--muted-foreground)) 51%);
+  background-size: 30px 100%, 90px 80px;
+  border-radius: 50%;
+  background-repeat: repeat, no-repeat;
+  background-position: 0 0;
+  box-sizing: border-box;
+  border: 10px solid hsl(var(--muted));
+  box-shadow: 0 0 0 4px hsl(var(--muted-foreground)) inset, 0 0 6px 6px hsl(var(--foreground)/0.2) inset;
+  animation: spin 3s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg) }
+  50% { transform: rotate(360deg) }
+  75% { transform: rotate(750deg) }
+  100% { transform: rotate(1800deg) }
+}
+
+@keyframes shake {
+  65%, 80%, 88%, 96% { transform: rotate(0.5deg) }
+  50%, 75%, 84%, 92% { transform: rotate(-0.5deg) }
+  0%, 50%, 100% { transform: rotate(0) }
+}
+
+@keyframes driveAcross {
+  from {
+    left: -15%;
+  }
+  to {
+    left: 115%;
+  }
+}
+
+@keyframes wheelSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes truckBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes motionBlur {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes roadMarkings {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 0.8;
+  }
+}
+
+.animate-driveAcross {
+  animation: driveAcross 8s linear infinite;
+}
+
+.animate-wheelSpin {
+  animation: wheelSpin 1s linear infinite;
+}
+
+.animate-truckBounce {
+  animation: truckBounce 1s ease-in-out infinite;
+}
+
+.animate-motionBlur {
+  animation: motionBlur 0.5s linear infinite;
+}
+
+.animate-roadMarkings {
+  animation: roadMarkings 0.5s linear infinite alternate;
+}
+
+/* Add these styles for better chart responsiveness */
+@media (max-width: 640px) {
+  .recharts-wrapper {
+    font-size: 12px;
+  }
+  
+  .recharts-tooltip-wrapper {
+    font-size: 11px;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scroll-area-horizontal {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .scroll-area-horizontal::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }

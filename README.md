@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Laundry Management System
+
+A modern web application for managing laundry services, built with Next.js 14 and featuring a responsive dashboard for both administrators and customers.
+
+## Features
+
+- **User Authentication**
+  - Secure login and signup functionality
+  - Role-based access control (Admin/User)
+  - JWT-based authentication
+
+- **Customer Features**
+  - Order tracking
+  - Payment history
+  - Profile management
+  - Real-time order status updates
+
+- **Admin Dashboard**
+  - Revenue analytics
+  - Order management
+  - User management
+  - Service configuration
+  - Performance reports
+
+- **Payment Integration**
+  - Secure payments via Stripe
+  - Payment history tracking
+  - Automated payment status updates
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React 18
+- **Styling**: Tailwind CSS, Shadcn UI
+- **State Management**: React Hooks
+- **Authentication**: JWT (jose)
+- **Database**: MongoDB with Mongoose
+- **Payment Processing**: Stripe
+- **Charts**: Recharts
+- **UI Components**: Radix UI
 
 ## Getting Started
 
-First, run the development server:
-
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [your-repo-url]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+Create a `.env.local` file with the following variables:
+```env
+MONGODB_URI=
+JWT_SECRET=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_FRONTEND_URL=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/                 # App router pages
+├── components/          # Reusable components
+├── lib/                 # Utility functions
+├── middleware/          # Authentication middleware
+├── models/             # MongoDB models
+└── providers/          # Context providers
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Authentication
 
-## Deploy on Vercel
+The application uses JWT-based authentication with role-based access control:
+- Public routes: `/`, `/login`, `/signup`
+- User routes: `/dashboard/history`, `/dashboard/profile`, etc.
+- Admin routes: `/dashboard/revenue`, `/dashboard/orders/manage`, etc.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The application is optimized for deployment on Vercel. Follow these steps:
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Configure environment variables in Vercel
+4. Deploy
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+[Your chosen license]
