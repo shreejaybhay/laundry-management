@@ -16,6 +16,7 @@ const userOnlyPaths = [
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
+  const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
   
   // Stripe success and webhook routes should bypass middleware completely
   if (pathname.startsWith('/api/webhooks/stripe') || 
@@ -48,13 +49,13 @@ export function middleware(request) {
 
   // If has token and trying to access root path or public paths, redirect to dashboard
   if (token && (pathname === "/" || isPublicPath)) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/dashboard", BASE_URL));
   }
 
   // If no token and not a public path or root path, redirect to login
   if (!token && !isPublicPath && pathname !== "/") {
     const from = encodeURIComponent(pathname);
-    return NextResponse.redirect(new URL(`/login?from=${from}`, request.url));
+    return NextResponse.redirect(new URL(`/login?from=${from}`, BASE_URL));
   }
 
   // Get user role from token
@@ -66,7 +67,7 @@ export function middleware(request) {
     }
   } catch (error) {
     // If token is invalid, redirect to login
-    const loginUrl = new URL("/login", request.url);
+    const loginUrl = new URL("/login", BASE_URL);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
@@ -77,15 +78,15 @@ export function middleware(request) {
 
   // For admin paths, verify admin status
   if (isAdminPath && userRole !== 'admin') {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/dashboard", BASE_URL));
   }
 
   // For user-only paths, redirect admins to appropriate admin page
   if (isUserOnlyPath && userRole === 'admin') {
     if (pathname.startsWith('/dashboard/history')) {
-      return NextResponse.redirect(new URL("/dashboard/orders/manage", request.url));
+      return NextResponse.redirect(new URL("/dashboard/orders/manage", BASE_URL));
     }
-    return NextResponse.redirect(new URL("/dashboard/revenue", request.url));
+    return NextResponse.redirect(new URL("/dashboard/revenue", BASE_URL));
   }
 
   return NextResponse.next();
