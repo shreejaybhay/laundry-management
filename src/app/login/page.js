@@ -41,18 +41,14 @@ export default function LoginPage() {
       }
 
       if (data.success) {
-        // Get the redirect URL from query params or use default based on user role
         const from = searchParams.get('from');
-        const redirectPath = from && from !== '/login' 
+        const redirectPath = from && from !== '/login' && !from.startsWith('/api/')
           ? decodeURIComponent(from)
           : data.user.role === 'admin' 
             ? '/dashboard'
             : '/dashboard';
-
-        // Ensure we're not redirecting to an API route
-        const cleanRedirectPath = redirectPath.replace('/api/', '/');
         
-        router.push(cleanRedirectPath);
+        router.push(redirectPath);
         router.refresh();
       } else {
         throw new Error(data.error || "Login failed");
@@ -94,6 +90,7 @@ export default function LoginPage() {
               }
               required
               disabled={isLoading}
+              autoComplete="email"
             />
           </div>
           <div className="space-y-2">
@@ -107,10 +104,16 @@ export default function LoginPage() {
               }
               required
               disabled={isLoading}
+              autoComplete="current-password"
             />
           </div>
 
-          <Button className="w-full" type="submit" disabled={isLoading}>
+          <Button 
+            className="w-full" 
+            type="submit" 
+            disabled={isLoading}
+            aria-label={isLoading ? "Signing in..." : "Sign In"}
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

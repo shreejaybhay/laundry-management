@@ -4,6 +4,9 @@ import Order from '@/models/Order';
 import connectDB from '@/lib/db';
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge'; // Optional: Use edge runtime for better performance
+
 export async function GET(req) {
   try {
     await auth(req);
