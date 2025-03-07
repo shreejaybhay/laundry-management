@@ -39,7 +39,7 @@ export function Navbar() {
               <span className={`text-xl font-bold transition-all duration-300 ${
                 scrolled ? 'text-foreground' : 'text-white'
               }`}>
-                LaundryPro
+                LaundryHub
               </span>
             </Link>
 
