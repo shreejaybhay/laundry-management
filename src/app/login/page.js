@@ -28,6 +28,9 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
@@ -35,7 +38,14 @@ function LoginContent() {
         },
         body: JSON.stringify(formData),
         credentials: 'include',
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 504) {
+        throw new Error("Login request timed out. Please try again.");
+      }
 
       const data = await response.json();
 
@@ -53,11 +63,13 @@ function LoginContent() {
         
         router.push(redirectPath);
         router.refresh();
-      } else {
-        throw new Error(data.error || "Login failed");
       }
     } catch (err) {
-      setError(err.message || "An error occurred during login");
+      if (err.name === 'AbortError') {
+        setError("Request timed out. Please try again.");
+      } else {
+        setError(err.message || "An error occurred during login");
+      }
       console.error("Login error:", err);
     } finally {
       setIsLoading(false);
