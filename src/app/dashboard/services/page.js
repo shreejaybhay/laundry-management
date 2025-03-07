@@ -31,6 +31,8 @@ import { Badge } from "@/components/ui/badge";
 import { THEME_COLORS } from '@/constants/theme';
 import { cn } from "@/lib/utils";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 const formatPrice = (price) => {
   if (!price) return '0.00';
   if (typeof price === 'object' && price.$numberDecimal) {
@@ -66,7 +68,7 @@ export default function ServicesPage() {
     const fetchServicesData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/services');
+        const response = await fetch(`${BASE_URL}/api/services`);
         const data = await response.json();
 
         if (!response.ok) throw new Error(data.error);
@@ -195,7 +197,7 @@ export default function ServicesPage() {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/services/${id}`, {
+      const response = await fetch(`${BASE_URL}/api/services/${id}`, {
         method: 'DELETE'
       });
 

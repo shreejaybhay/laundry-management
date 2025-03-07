@@ -5,6 +5,8 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { useRouter } from 'next/navigation';
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -14,7 +16,7 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     const checkUserRole = async () => {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch(`${BASE_URL}/api/auth/me`);
         const data = await response.json();
         
         setIsAdmin(data.user.role === 'admin');

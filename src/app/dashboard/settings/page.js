@@ -20,6 +20,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { WashingMachineLoader } from "@/components/ui/washing-machine-loader";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -57,7 +59,7 @@ export default function SettingsPage() {
 
     async function fetchUserData() {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch(`${BASE_URL}/api/auth/me`);
         if (!response.ok) throw new Error('Failed to fetch profile');
 
         const data = await response.json();
@@ -106,7 +108,7 @@ export default function SettingsPage() {
     try {
       setLoading(true);
 
-      const response = await fetch('/api/auth/profile', {
+      const response = await fetch(`${BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

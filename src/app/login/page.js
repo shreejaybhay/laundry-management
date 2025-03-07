@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 function LoginContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -26,7 +28,7 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

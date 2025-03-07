@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { CreditCard, Wallet } from 'lucide-react';
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 export function PaymentDialog({ order, onSuccess }) {
   const [isOpen, setIsOpen] = useState(false);
   const [method, setMethod] = useState('ONLINE');
@@ -14,7 +16,7 @@ export function PaymentDialog({ order, onSuccess }) {
   const handlePayment = async () => {
     try {
       setIsProcessing(true);
-      const response = await fetch('/api/payments', {
+      const response = await fetch(`${BASE_URL}/api/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

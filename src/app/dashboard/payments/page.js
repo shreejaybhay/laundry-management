@@ -45,6 +45,7 @@ import { motion } from "framer-motion";
 
 const MINIMUM_LOADING_TIME = 1500; // Define constant for consistency
 const ITEMS_PER_PAGE = 5;
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -131,14 +132,14 @@ export default function PaymentsPage() {
       
       // Fetch both payments and orders in parallel
       const [paymentsResponse, ordersResponse] = await Promise.all([
-        fetch('/api/payments', {
+        fetch(`${BASE_URL}/api/payments`, {
           headers: {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache'
           },
           credentials: 'include'
         }),
-        fetch('/api/orders', {
+        fetch(`${BASE_URL}/api/orders`, {
           headers: {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache'

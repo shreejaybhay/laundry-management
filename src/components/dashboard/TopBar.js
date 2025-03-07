@@ -16,6 +16,8 @@ import { Menu, Bell, User, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { WashingMachineLoader } from "@/components/ui/washing-machine-loader";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 const TopBarSkeleton = () => (
   <header className="sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div className="flex h-14 items-center border-b border-border px-4">
@@ -66,7 +68,7 @@ export default function TopBar({ onMenuClick }) {
     e.stopPropagation();
     
     try {
-      const response = await fetch('/api/auth/logout', {
+      const response = await fetch(`${BASE_URL}/api/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

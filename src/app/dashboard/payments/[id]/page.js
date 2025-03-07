@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { WashingMachineLoader } from '@/components/ui/washing-machine-loader';
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
 const MINIMUM_LOADING_TIME = 1500; // Define constant for consistency
 
 const fadeIn = {
@@ -55,7 +56,7 @@ export default function PaymentDetailsPage({ params }) {
 
       if (isOrderPayment) {
         // Handle order-based payments
-        const orderResponse = await fetch(`/api/orders/${actualId}`);
+        const orderResponse = await fetch(`${BASE_URL}/api/orders/${actualId}`);
         if (!orderResponse.ok) throw new Error('Order not found');
         const orderData = await orderResponse.json();
 
@@ -84,7 +85,7 @@ export default function PaymentDetailsPage({ params }) {
 
       } else {
         // Handle regular payment IDs
-        const response = await fetch(`/api/payments/${actualId}`);
+        const response = await fetch(`${BASE_URL}/api/payments/${actualId}`);
         if (!response.ok) throw new Error('Payment not found');
         
         const data = await response.json();
@@ -116,7 +117,7 @@ export default function PaymentDetailsPage({ params }) {
           });
         } else if (data.payment.orderId) {
           // If we don't have orderDetails but have orderId, fetch the order separately
-          const orderResponse = await fetch(`/api/orders/${data.payment.orderId}`);
+          const orderResponse = await fetch(`${BASE_URL}/api/orders/${data.payment.orderId}`);
           if (orderResponse.ok) {
             const orderData = await orderResponse.json();
             setOrder({

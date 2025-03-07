@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { WashingMachineLoader } from '@/components/ui/washing-machine-loader';
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 // Keep existing theme colors
 const THEME_COLORS = {
   primary: '#0ea5e9',    // Blue
@@ -67,8 +69,8 @@ export default function ReportsPage() {
       console.log('Fetching data for date:', formattedDate);
 
       const [reportsResponse, trendsResponse] = await Promise.all([
-        fetch(`/api/reports?date=${formattedDate}`),
-        fetch(`/api/reports/trends?days=${timeRange}`)
+        fetch(`${BASE_URL}/api/reports?date=${formattedDate}`),
+        fetch(`${BASE_URL}/api/reports/trends?days=${timeRange}`)
       ]);
 
       console.log('API Response Status:', {

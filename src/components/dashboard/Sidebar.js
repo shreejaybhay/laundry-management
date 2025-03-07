@@ -26,6 +26,8 @@ import {
   Plus
 } from "lucide-react";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 // Add theme colors at the top of the file
 const THEME_COLORS = {
   primary: '#0ea5e9',    // Blue
@@ -114,7 +116,7 @@ export default function Sidebar({ isOpen, onClose }) {
     setMounted(true);
     const checkUserRole = async () => {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch(`${BASE_URL}/api/auth/me`);
         if (response.ok) {
           const data = await response.json();
           setIsAdmin(data.user.role === 'admin');

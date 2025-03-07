@@ -30,6 +30,8 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 const CHART_COLORS = {
   primary: '#0ea5e9', // Blue
   secondary: '#f59e0b', // Yellow
@@ -197,7 +199,7 @@ const DashboardPage = () => {
   const checkUserRole = async () => {
     try {
       setIsAuthChecking(true);
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch(`${BASE_URL}/api/auth/me`, {
         credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache'
@@ -233,7 +235,7 @@ const DashboardPage = () => {
       const isAdminUser = await checkUserRole();
       const endpoint = isAdminUser ? '/api/dashboard/stats' : '/api/dashboard/user-stats';
       
-      const response = await fetch(endpoint, {
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -20,6 +20,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { formatDecimal } from '@/lib/utils';
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 const THEME_COLORS = {
   primary: '#0ea5e9',    // Blue
   secondary: '#f59e0b',  // Yellow
@@ -71,7 +73,7 @@ export default function TrackPage() {
     setOrder(null);
 
     try {
-      const response = await fetch(`/api/orders/${search.trim()}/track`);
+      const response = await fetch(`${BASE_URL}/api/orders/${search.trim()}/track`);
       const data = await response.json();
       
       if (!response.ok) {

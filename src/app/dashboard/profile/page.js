@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Save } from "lucide-react";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -27,7 +29,7 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchUserProfile() {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch(`${BASE_URL}/api/auth/me`);
         if (!response.ok) throw new Error('Failed to fetch profile');
         
         const data = await response.json();
@@ -52,7 +54,7 @@ export default function ProfilePage() {
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/profile', {
+      const response = await fetch(`${BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

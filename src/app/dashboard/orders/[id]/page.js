@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { WashingMachineLoader } from "@/components/ui/washing-machine-loader";
 import { motion } from "framer-motion";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 // Add theme colors
 const THEME_COLORS = {
   primary: '#0ea5e9',    // Blue
@@ -27,8 +29,8 @@ const THEME_COLORS = {
   violet: '#8b5cf6',     // Violet
 };
 
-export default function OrderDetailsPage({ params }) {
-  const { id } = params; // Using id consistently
+export default function OrderDetailsPage() {
+  const params = useParams();
   const router = useRouter();
   const [order, setOrder] = useState(null);
   const [payment, setPayment] = useState(null);
@@ -48,7 +50,7 @@ export default function OrderDetailsPage({ params }) {
     const initialize = async () => {
       try {
         // First get the user role
-        const roleResponse = await fetch('/api/auth/me');
+        const roleResponse = await fetch(`${BASE_URL}/api/auth/me`);
         const roleData = await roleResponse.json();
         setUserRole(roleData.user.role);
 
@@ -65,7 +67,7 @@ export default function OrderDetailsPage({ params }) {
 
   async function loadOrderDetails() {
     try {
-      const response = await fetch(`/api/orders/${params.id}`);
+      const response = await fetch(`${BASE_URL}/api/orders/${params.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch order');
       }
@@ -807,7 +809,7 @@ export default function OrderDetailsPage({ params }) {
 
 async function handleCashOnDelivery(orderId) {
   try {
-    const response = await fetch('/api/payments', {
+    const response = await fetch(`${BASE_URL}/api/payments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -838,7 +840,7 @@ function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
   const handleCODPayment = async () => {
     try {
       setIsProcessing(true);
-      const response = await fetch('/api/payments', {
+      const response = await fetch(`${BASE_URL}/api/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -863,14 +865,14 @@ function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
   const handleOnlinePayment = async () => {
     try {
       setIsProcessing(true);
-      const response = await fetch('/api/payments', {
+      const response = await fetch(`${BASE_URL}/api/payments/stripe/create-session`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           orderId,
-          method: 'ONLINE',
-          amount: totalAmount
-        })
+        }),
       });
 
       const data = await response.json();

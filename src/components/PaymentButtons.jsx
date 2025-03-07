@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Banknote } from "lucide-react";
 import { toast } from "sonner";
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 export function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCODPayment = async () => {
     try {
       setIsProcessing(true);
-      const response = await fetch('/api/payments', {
+      const response = await fetch(`${BASE_URL}/api/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -38,7 +40,7 @@ export function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
   const handleOnlinePayment = async () => {
     try {
       setIsProcessing(true);
-      const response = await fetch('/api/payments', {
+      const response = await fetch(`${BASE_URL}/api/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -43,6 +43,8 @@ const THEME_COLORS = {
 
 const ITEMS_PER_PAGE = 5; // Changed to 5 items per page
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 const formatServiceName = (payment) => {
   if (payment.orderDetails?.services) {
     return payment.orderDetails.services
@@ -119,7 +121,7 @@ export default function RevenuePage() {
     const loadData = async () => {
       try {
         console.log('Fetching payments data...');
-        const response = await fetch('/api/payments?limit=1000&admin=true', {
+        const response = await fetch(`${BASE_URL}/api/payments?limit=1000&admin=true`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

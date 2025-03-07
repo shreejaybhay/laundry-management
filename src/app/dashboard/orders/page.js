@@ -92,6 +92,8 @@ function formatRelativeTime(date) {
   }
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
+
 export default function OrdersPage() {
   const [date, setDate] = useState(null);
   const [status, setStatus] = useState("all");
@@ -132,7 +134,7 @@ export default function OrdersPage() {
   // Add function to get user role
   async function getUserRole() {
     try {
-      const response = await fetch('/api/auth/me');
+      const response = await fetch(`${BASE_URL}/api/auth/me`);
       const data = await response.json();
       
       if (!response.ok) throw new Error(data.error);
@@ -187,7 +189,7 @@ export default function OrdersPage() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`/api/orders/${orderId}/status`, {
+      const response = await fetch(`${BASE_URL}/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus.toLowerCase() })
@@ -225,7 +227,7 @@ export default function OrdersPage() {
   // Add function to create order
   async function createOrder(formData) {
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch(`${BASE_URL}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -247,7 +249,7 @@ export default function OrdersPage() {
   // Add this function to fetch available services
   const fetchAvailableServices = async () => {
     try {
-      const response = await fetch('/api/services');
+      const response = await fetch(`${BASE_URL}/api/services`);
       const data = await response.json();
       // Filter only active services
       const activeServices = data.services.filter(service => service.isActive);
@@ -361,7 +363,7 @@ export default function OrdersPage() {
   // Add this function to handle order cancellation
   const cancelOrder = async (orderId) => {
     try {
-      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+      const response = await fetch(`${BASE_URL}/api/orders/${orderId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
