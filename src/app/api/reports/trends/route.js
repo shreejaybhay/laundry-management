@@ -1,11 +1,12 @@
-export const runtime = 'nodejs'; // Use Node.js runtime for JWT and MongoDB support
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { auth } from '@/middleware/auth';
 import { apiResponse } from '@/lib/apiResponse';
 import Order from '@/models/Order';
 import connectDB from '@/lib/db';
 import { format, startOfDay, endOfDay, subDays } from 'date-fns';
-
-export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
   try {
