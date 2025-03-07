@@ -1,4 +1,4 @@
-export const runtime = 'edge'; // Use edge runtime for better performance
+export const runtime = 'nodejs'; // Use Node.js runtime for JWT and MongoDB support
 import { auth } from '@/middleware/auth';
 import { apiResponse } from '@/lib/apiResponse';
 import Order from '@/models/Order';
