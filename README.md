@@ -8,7 +8,16 @@ A modern web application for managing laundry services, built with **Next.js 14*
 ![Stripe](https://img.shields.io/badge/Stripe-Payments-blueviolet?style=for-the-badge&logo=stripe)
 ![JWT](https://img.shields.io/badge/JWT-Authentication-orange?style=for-the-badge&logo=json-web-tokens)
 
-[Live Demo](https://laundryhub-plum.vercel.app/dashboard/orders) 
+## 🌐 Live Demo
+
+🔗 **[View Live Demo](https://laundryhub-plum.vercel.app/dashboard/orders)**
+
+> **Note**: The demo is hosted on Vercel and may take a few seconds to wake up on first load.
+
+### Demo Features
+- Full access to customer dashboard
+- Test payments with Stripe (Use card: 4242 4242 4242 4242)
+- Real-time order tracking
 
 ---
 
@@ -302,4 +311,4 @@ SOFTWARE.
 
 ---
 
-<p align="center">Made with ❤️ by <a href="https://github.com/shreejaybhay">Shreejay Bhay</a></p>
+<p align="center">Made with ❤️ by <a href="https://github.com/shreejaybhay">Shree Jaybhay</a></p>
