@@ -52,7 +52,17 @@ async function getDashboardStats(req) {
     });
 
     const processingOrders = await Order.countDocuments({ 
-      status: { $in: ["pending", "processing"] }
+      status: "pending", // Only count pending orders
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+
+    // Add debug logging
+    console.log('Admin Dashboard - Processing orders query result:', {
+      count: processingOrders,
+      dateRange: {
+        from: thirtyDaysAgo,
+        to: new Date()
+      }
     });
 
     const activeUsers = await Order.distinct('userId', { 

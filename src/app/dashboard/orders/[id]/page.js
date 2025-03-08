@@ -10,7 +10,9 @@ import { format } from 'date-fns';
 import {
   CheckCircle2, Clock, CreditCard, Banknote, ArrowLeft, MapPin,
   Package, Calendar, AlertCircle, Receipt, User, Truck, Settings, StickyNote,
-  Info, Scale, Home, XCircle, Building2, Wallet
+  Info, Scale, Home, XCircle, Building2, Wallet,
+  Check,
+  X
 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +77,7 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [showLoader, setShowLoader] = useState(true);
   const [userRole, setUserRole] = useState(null);
+  const [existingPayment, setExistingPayment] = useState(null);
 
   useEffect(() => {
     const minLoadingTime = setTimeout(() => {
@@ -89,8 +92,12 @@ export default function OrderDetailsPage() {
       try {
         // First get the user role
         const roleResponse = await fetch(`${BASE_URL}/api/auth/me`);
+        if (!roleResponse.ok) {
+          throw new Error('Failed to fetch user role');
+        }
         const roleData = await roleResponse.json();
         setUserRole(roleData.user.role);
+        console.log('User Role:', roleData.user.role); // Debug log
 
         // Then load order details
         await loadOrderDetails();
@@ -111,7 +118,15 @@ export default function OrderDetailsPage() {
       }
       const data = await response.json();
       setOrder(data.order);
-      setPayment(data.payment);
+      
+      // Use the correct endpoint for fetching payment by order ID
+      if (data.order?._id) {
+        const paymentResponse = await fetch(`${BASE_URL}/api/payments/by-order/${data.order._id}`);
+        if (paymentResponse.ok) {
+          const paymentData = await paymentResponse.json();
+          setPayment(paymentData.payment);
+        }
+      }
     } catch (error) {
       console.error('Error loading details:', error);
       toast.error('Failed to load order details');
@@ -128,7 +143,7 @@ export default function OrderDetailsPage() {
 
   if (loading || showLoader) {
     return (
-<div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)]">
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)]">
         <WashingMachineLoader />
         <p className="mt-4 text-muted-foreground">Loading orders details...</p>
       </div>
@@ -158,6 +173,8 @@ export default function OrderDetailsPage() {
     );
   }
 
+  console.log('Current state:', { userRole, payment }); // Debug log
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       {/* Header */}
@@ -176,11 +193,11 @@ export default function OrderDetailsPage() {
               <h1 className="text-3xl font-bold tracking-tight">Order Details</h1>
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Order</span>
-                <span 
+                <span
                   className="px-2 py-0.5 rounded bg-primary/10 text-primary"
-                  style={{ 
+                  style={{
                     backgroundColor: `${THEME_COLORS.primary}15`,
-                    color: THEME_COLORS.primary 
+                    color: THEME_COLORS.primary
                   }}
                 >
                   #{order.id.slice(-8)}
@@ -267,7 +284,7 @@ export default function OrderDetailsPage() {
                       <div>
                         <p className="font-medium text-destructive">Order Cancelled</p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {order.updatedAt 
+                          {order.updatedAt
                             ? `Order was cancelled on ${format(new Date(order.updatedAt), 'PPP')}`
                             : 'Order was cancelled'
                           }
@@ -481,6 +498,9 @@ export default function OrderDetailsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Remove the first occurrence of the COD payment section */}
+
+              {/* Keep existing conditions for other status */}
               {order.status?.toLowerCase() === 'cancelled' ? (
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl bg-muted/50 border border-border">
@@ -558,86 +578,59 @@ export default function OrderDetailsPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Payment Status Banner */}
-                  <div className={`flex items-center gap-3 p-4 rounded-lg bg-[${THEME_COLORS.secondary}]/10 border border-[${THEME_COLORS.secondary}]/20`}>
-                    <Clock className={`w-5 h-5 text-[${THEME_COLORS.secondary}] animate-pulse`} />
-                    <div>
-                      <p className={`text-base font-medium text-[${THEME_COLORS.secondary}]`}>
-                        Payment Pending
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Complete payment to process order
-                      </p>
+                  {/* Only show Payment Status Banner if NOT COD */}
+                  {(!existingPayment || existingPayment.method !== 'COD') && (
+                    <div className={`flex items-center gap-3 p-4 rounded-lg bg-[${THEME_COLORS.secondary}]/10 border border-[${THEME_COLORS.secondary}]/20`}>
+                      <Clock className={`w-5 h-5 text-[${THEME_COLORS.secondary}] animate-pulse`} />
+                      <div>
+                        <p className={`text-base font-medium text-[${THEME_COLORS.secondary}]`}>
+                          Payment Pending
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Complete payment to process order
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Order Summary Before Payment */}
-                  <div className="space-y-4">
-                    <div className="p-4 rounded-lg bg-muted/50">
-                      <h4 className="text-sm font-medium text-muted-foreground mb-3">Order Summary</h4>
+                  {/* COD Payment Status section */}
+                  {existingPayment && existingPayment.method === 'COD' && (
+                    <div className="space-y-4 p-4 rounded-lg bg-muted/50">
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Service</span>
-                          <span className="text-sm font-medium">{order.services[0]?.name}</span>
+                          <span className="text-sm text-muted-foreground">Method</span>
+                          <span className="text-sm font-medium">Cash on Delivery</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Weight</span>
-                          <span className="text-sm font-medium">{formatDecimal(order.services[0]?.weight)}kg</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Price per kg</span>
-                          <span className="text-sm font-medium">${formatDecimal(order.services[0]?.pricePerKg)}/kg</span>
-                        </div>
-                        <div className="pt-2 mt-2 border-t border-border/50 flex justify-between items-center">
-                          <span className="text-sm font-medium">Total Amount Due</span>
-                          <span className="text-base font-bold" style={{ color: THEME_COLORS.primary }}>
+                          <span className="text-sm text-muted-foreground">Amount</span>
+                          <span className="text-lg font-bold" style={{ color: THEME_COLORS.primary }}>
                             ${formatDecimal(order.totalPrice)}
                           </span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Payment Methods Info */}
-                    <div className="p-4 rounded-lg bg-muted/30">
-                      <h4 className="text-sm font-medium text-muted-foreground mb-3">Available Payment Methods</h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 rounded-lg bg-background/80 border border-border flex items-center gap-2 hover:bg-muted/50 transition-colors duration-200">
-                          <div className="p-1.5 rounded-full bg-primary/10">
-                            <CreditCard className="w-4 h-4 text-primary" />
-                          </div>
-                          <span className="text-sm font-medium">Card Payment</span>
-                        </div>
-                        <div className="p-3 rounded-lg bg-background/80 border border-border flex items-center gap-2 hover:bg-muted/50 transition-colors duration-200">
-                          <div className="p-1.5 rounded-full bg-primary/10">
-                            <Banknote className="w-4 h-4 text-primary" />
-                          </div>
-                          <span className="text-sm font-medium">Cash on Delivery</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {userRole === 'admin' ? (
-                      <Button
-                        variant="outline"
-                        className="w-full gap-2 py-6 text-base font-medium hover:scale-[1.02] transition-transform"
-                        onClick={() => router.push(`/dashboard/orders`)}
-                      >
-                        <Settings className={`w-5 h-5 text-[${THEME_COLORS.violet}]`} />
-                        Manage Order
-                      </Button>
-                    ) : (
-                      <div className="space-y-3">
+                      {userRole === 'admin' && (
                         <PaymentButtons
                           orderId={order.id}
                           totalAmount={order.totalPrice}
+                          payment={existingPayment}
+                          userRole={userRole}
                           onPaymentComplete={() => router.refresh()}
                         />
-                        <p className="text-xs text-center text-muted-foreground">
-                          Secure payment powered by Stripe. Your payment information is encrypted.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Payment Buttons for non-admin users or when no payment exists */}
+                  {(!existingPayment || userRole !== 'admin') && (
+                    <PaymentButtons
+                      orderId={order.id}
+                      totalAmount={order.totalPrice}
+                      payment={existingPayment}
+                      userRole={userRole}
+                      onPaymentComplete={() => router.refresh()}
+                    />
+                  )}
                 </div>
               )}
             </CardContent>
@@ -860,67 +853,13 @@ async function handleCashOnDelivery(orderId) {
 }
 
 // Separate PaymentButtons component
-function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
+function PaymentButtons({ orderId, totalAmount, onPaymentComplete, payment: initialPayment, userRole: initialUserRole }) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [existingPayment, setExistingPayment] = useState(null);
+  const [payment, setPayment] = useState(initialPayment);
+  const [userRole, setUserRole] = useState(initialUserRole);
 
-  // Use existing endpoint to check payment status
-  useEffect(() => {
-    const checkExistingPayment = async () => {
-      try {
-        const response = await fetch(`${BASE_URL}/api/payments/${orderId}`);
-        const data = await response.json();
-        if (response.ok && data.payment) {
-          setExistingPayment(data.payment);
-        }
-      } catch (error) {
-        console.error('Error checking payment:', error);
-      }
-    };
-
-    checkExistingPayment();
-  }, [orderId]);
-
-  // If there's an existing COD payment, show a message instead of buttons
-  if (existingPayment && existingPayment.method === 'COD') {
-    return (
-      <div className="p-4 rounded-lg bg-muted/50 text-center">
-        <p className="text-muted-foreground">
-          Cash on Delivery payment has been registered for this order
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          Payment will be collected upon delivery
-        </p>
-      </div>
-    );
-  }
-
-  const handleCODPayment = async () => {
-    try {
-      setIsProcessing(true);
-      const response = await fetch(`${BASE_URL}/api/payments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId,
-          method: 'COD',
-          amount: totalAmount
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-
-      toast.success('Cash on Delivery payment registered successfully');
-      if (onPaymentComplete) onPaymentComplete();
-    } catch (error) {
-      toast.error(error.message || 'Failed to register COD payment');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleOnlinePayment = async () => {
+  // Add handleOnlinePayment function
+  const handleOnlinePayment = async (orderId, amount) => {
     try {
       setIsProcessing(true);
       const response = await fetch(`${BASE_URL}/api/payments`, {
@@ -928,6 +867,7 @@ function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           orderId,
           method: 'ONLINE'
@@ -937,40 +877,252 @@ function PaymentButtons({ orderId, totalAmount, onPaymentComplete }) {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
 
+      // Redirect to Stripe checkout
       if (data.stripeSession?.url) {
         window.location.href = data.stripeSession.url;
       } else {
-        throw new Error('No checkout URL received');
+        throw new Error('No payment URL received');
       }
+
     } catch (error) {
-      toast.error(error.message || 'Failed to initiate online payment');
+      toast.error(error.message || 'Failed to process online payment');
       setIsProcessing(false);
     }
   };
 
+  // Fetch payment if not provided initially
+  useEffect(() => {
+    const fetchPayment = async () => {
+      if (!orderId || payment) return;
+
+      try {
+        const response = await fetch(`${BASE_URL}/api/payments/by-order/${orderId}`, {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.payment) {
+            setPayment(data.payment);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching payment:', error);
+      }
+    };
+
+    fetchPayment();
+  }, [orderId, payment]);
+
+  // Update payment state when initialPayment changes
+  useEffect(() => {
+    if (initialPayment) {
+      setPayment(initialPayment);
+    }
+  }, [initialPayment]);
+
+  // Update userRole state when initialUserRole changes
+  useEffect(() => {
+    if (initialUserRole) {
+      setUserRole(initialUserRole);
+    }
+  }, [initialUserRole]);
+
+  const handleCODPayment = async (orderId) => {
+    try {
+      setIsProcessing(true);
+      const response = await fetch(`${BASE_URL}/api/payments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          orderId,
+          method: 'COD'
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+
+      setPayment(data.payment);
+      toast.success('Cash on delivery set up successfully');
+      if (onPaymentComplete) onPaymentComplete();
+    } catch (error) {
+      toast.error(error.message || 'Failed to set up cash on delivery');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const renderPaymentStatus = () => {
+    if (!payment) return null;
+
+    return (
+      <div className="p-4 rounded-lg bg-orange-50 border border-orange-200">
+        <div className="flex items-center gap-3 mb-2">
+          {payment.method === 'COD' ? (
+            <Banknote className="h-5 w-5 text-orange-600" />
+          ) : (
+            <CreditCard className="h-5 w-5 text-orange-600" />
+          )}
+          <p className="font-medium text-orange-600">
+            {payment.method === 'COD' ? 'Cash on Delivery Payment' : 'Online Payment'}
+          </p>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Payment Status: {' '}
+            <Badge
+              variant="outline"
+              className={payment.status === 'PAID' 
+                ? 'bg-green-50 text-green-600 border-green-200'
+                : 'bg-orange-50 text-orange-600 border-orange-200'
+              }
+            >
+              {payment.status}
+            </Badge>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Amount: ${payment.amount}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPaymentButtons = () => {
+    // Don't show payment buttons for admin or if payment exists
+    if (userRole === 'admin' || payment) return null;
+
+    return (
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="outline"
+          onClick={() => handleCODPayment(orderId)}
+          disabled={isProcessing}
+          className="w-full h-auto py-4"
+        >
+          <div className="flex flex-col items-center gap-1">
+            <Banknote className="h-5 w-5" />
+            <span>Pay with Cash on Delivery</span>
+          </div>
+        </Button>
+        <Button
+          onClick={() => handleOnlinePayment(orderId, totalAmount)}
+          disabled={isProcessing}
+          className="w-full h-auto py-4"
+        >
+          <div className="flex flex-col items-center gap-1">
+            <CreditCard className="h-5 w-5" />
+            <span>Pay Online</span>
+          </div>
+        </Button>
+      </div>
+    );
+  };
+
+  const renderAdminControls = () => {
+    if (!payment || userRole !== 'admin' || payment.method !== 'COD') return null;
+
+    return (
+      <AdminCODControls 
+        payment={{
+          _id: payment.id,
+          status: payment.status,
+          method: payment.method,
+          amount: payment.amount,
+          orderId: payment.orderId
+        }}
+        onStatusUpdate={async () => {
+          const response = await fetch(`${BASE_URL}/api/payments/${orderId}`, {
+            credentials: 'include'
+          });
+          const data = await response.json();
+          if (response.ok && data.payment) {
+            setPayment(data.payment);
+          }
+          if (onPaymentComplete) onPaymentComplete();
+        }} 
+      />
+    );
+  };
+
   return (
-    <div className="flex flex-col gap-2">
-      <Button
-        variant="outline"
-        onClick={handleCODPayment}
-        disabled={isProcessing}
-        className="w-full h-auto py-4"
-      >
-        <div className="flex flex-col items-center gap-1">
-          <Banknote className="h-5 w-5" />
-          <span>Pay with Cash on Delivery</span>
-        </div>
-      </Button>
-      <Button
-        onClick={handleOnlinePayment}
-        disabled={isProcessing}
-        className="w-full h-auto py-4"
-      >
-        <div className="flex flex-col items-center gap-1">
-          <CreditCard className="h-5 w-5" />
-          <span>Pay Online</span>
-        </div>
-      </Button>
+    <div className="space-y-4">
+      {renderPaymentStatus()}
+      {renderPaymentButtons()}
+      {renderAdminControls()}
+    </div>
+  );
+}
+
+const updatePaymentStatus = async (orderId, status) => {
+  const response = await fetch(`${BASE_URL}/api/payments/${orderId}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ status }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to update payment status');
+  }
+  return data;
+};
+
+function AdminCODControls({ payment, onStatusUpdate }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      setIsUpdating(true);
+      await updatePaymentStatus(payment.orderId, newStatus);
+      toast.success('Payment status updated successfully');
+      if (onStatusUpdate) onStatusUpdate();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update payment status');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 mt-4">
+      <div className="flex flex-col gap-2">
+        {payment.status !== 'PAID' && (
+          <Button
+            variant="outline"
+            onClick={() => handleStatusUpdate('PAID')}
+            disabled={isUpdating}
+            className="w-full bg-green-50 hover:bg-green-100 text-green-600 border-green-200"
+          >
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4" />
+              <span>Mark as Paid</span>
+            </div>
+          </Button>
+        )}
+        {payment.status !== 'PENDING' && (
+          <Button
+            variant="outline"
+            onClick={async () => {
+              await handleStatusUpdate('PENDING');
+              window.location.reload(); // Force page reload after status update
+            }}
+            disabled={isUpdating}
+            className="w-full bg-orange-50 hover:bg-orange-100 text-orange-600 border-orange-200"
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span>Mark as Pending</span>
+            </div>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

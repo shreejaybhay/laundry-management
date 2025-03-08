@@ -159,7 +159,6 @@ export default function SettingsPage() {
       <Tabs defaultValue="account" className="space-y-4">
         <TabsList>
           <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
         </TabsList>
 

@@ -18,9 +18,15 @@ export async function updatePaymentStatus(orderId, status) {
   const response = await fetch(`/api/payments/${orderId}/status`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ status }),
   });
-  if (!response.ok) throw new Error('Failed to update payment status');
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update payment status');
+  }
+  
   return response.json();
 }
 

@@ -10,32 +10,27 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import {
   Package, Calendar, CreditCard, Scale, Search,
-  Receipt, ArrowRight, MapPin, Clock, CheckCircle2, XCircle,
-  FileText
+  Receipt, ArrowRight, MapPin, Clock, CheckCircle2, XCircle, Settings, Truck
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { cn, formatDecimal } from '@/lib/utils';
+import { formatDecimal } from '@/lib/utils';
 import { Separator } from "@/components/ui/separator";
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
 
-// Consistent color palette
 const THEME_COLORS = {
-  primary: 'hsl(var(--primary))',
-  secondary: 'hsl(var(--secondary))',
-  muted: 'hsl(var(--muted))',
-  border: 'hsl(var(--border))',
-  background: 'hsl(var(--background))',
-  foreground: 'hsl(var(--foreground))',
-  success: 'hsl(142.1 76.2% 36.3%)',
-  danger: 'hsl(var(--destructive))',
+  primary: '#0ea5e9',    // Blue
+  secondary: '#f59e0b',  // Yellow
+  tertiary: '#6366f1',   // Purple
+  success: '#10b981',    // Green
+  danger: '#f43f5e',     // Red
+  violet: '#8b5cf6',     // Violet
 };
 
-// Consistent glass effect
 const GLASS_EFFECT = {
-  backgroundColor: 'hsl(var(--background))',
-  backdropFilter: 'blur(10px)',
-  border: '1px solid hsl(var(--border))',
+  background: "rgba(255, 255, 255, 0.05)",
+  backdropFilter: "blur(10px)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
 };
 
 const fadeIn = {
@@ -114,24 +109,30 @@ export default function TrackPage() {
   };
 
   return (
-    <div className="flex-1 space-y-8 p-8 pt-6 min-h-screen bg-gradient-to-b from-background to-background/80">
+    <div className="flex-1 space-y-6 p-4 sm:p-8 pt-6 min-h-screen">
       {/* Modern Header */}
       <motion.div 
-        className="max-w-3xl mx-auto text-center space-y-6"
+        className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-6 px-2"
         initial="initial"
         animate="animate"
         variants={fadeIn}
       >
-        <div className="inline-flex p-2 rounded-2xl bg-card shadow-lg border border-border/50">
-          <div className="p-4 rounded-xl bg-primary/10">
-            <Package className="w-10 h-10 text-primary" />
+        <div className="inline-flex p-2 rounded-2xl bg-white/50 dark:bg-slate-800/50 shadow-xl" style={GLASS_EFFECT}>
+          <div
+            className="p-3 sm:p-4 rounded-xl"
+            style={{
+              background: `linear-gradient(135deg, ${THEME_COLORS.primary}15, ${THEME_COLORS.primary}25)`,
+              boxShadow: `0 4px 12px ${THEME_COLORS.primary}15`
+            }}
+          >
+            <Package className="w-8 h-8 sm:w-10 sm:h-10" style={{ color: THEME_COLORS.primary }} />
           </div>
         </div>
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
             Track Your Order
           </h1>
-          <p className="text-lg text-muted-foreground mt-3">
+          <p className="text-base sm:text-lg text-muted-foreground mt-2 sm:mt-3 px-4">
             Enter your order ID to track your laundry status in real-time
           </p>
         </div>
@@ -139,34 +140,34 @@ export default function TrackPage() {
 
       {/* Search Form */}
       <motion.div
-        className="max-w-2xl mx-auto"
+        className="max-w-2xl mx-auto px-2"
         initial="initial"
         animate="animate"
         variants={fadeIn}
       >
         <form
           onSubmit={handleSearch}
-          className="relative flex gap-3 p-2 rounded-2xl bg-card border border-border/50 shadow-lg"
+          className="relative flex flex-col sm:flex-row gap-2 sm:gap-3 p-2 rounded-2xl bg-slate-100/80 shadow-lg dark:bg-slate-900"
         >
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Enter Order ID (e.g., d82e888d)"
-            className="flex-1 text-lg h-12 bg-background/50"
-            disabled={loading}
+            className="flex-1 text-base sm:text-lg h-12 border-none placeholder:text-muted-foreground/50"
+            disabled={showLoader}
           />
           <Button 
             type="submit" 
-            className="h-12 px-6 rounded-xl"
-            disabled={loading}
+            className="h-12 px-6 rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:opacity-90 transition-all duration-200 w-full sm:w-auto" 
+            disabled={showLoader}
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
+            {showLoader ? (
+              <span className="flex items-center justify-center gap-2">
                 <Clock className="w-5 h-5 animate-spin" />
                 Searching...
               </span>
             ) : (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center justify-center gap-2">
                 Track Order
                 <Search className="w-5 h-5" />
               </span>
@@ -176,35 +177,46 @@ export default function TrackPage() {
       </motion.div>
 
       {/* Order Details Card */}
-      {!loading && order && (
+      {!showLoader && order && (
         <motion.div
-          className="max-w-3xl mx-auto"
+          className="max-w-3xl mx-auto px-2"
           initial="initial"
           animate="animate"
           variants={fadeIn}
         >
-          <Card className="overflow-hidden border border-border/50">
-            <CardHeader className="border-b border-border p-4">
-              <div className="flex items-center justify-between">
+          <Card className="overflow-hidden shadow-xl dark:bg-slate-800/50">
+            <CardHeader className="border-b border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Receipt className="w-5 h-5 text-primary" />
+                  <div
+                    className="p-2 rounded-lg"
+                    style={{
+                      backgroundColor: `${THEME_COLORS.primary}10`,
+                    }}
+                  >
+                    <Receipt className="w-5 h-5" style={{ color: THEME_COLORS.primary }} />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-semibold">
+                    <CardTitle className="text-base sm:text-lg font-semibold">
                       Order #{order.id.slice(-8)}
                     </CardTitle>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
+                      <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         {format(new Date(order.createdAt), 'MMM dd, yyyy')}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <Badge variant={order.status.toLowerCase() === 'paid' ? 'success' : 'destructive'}>
-                  {order.status.toLowerCase() === 'paid' ? (
+                <Badge 
+                  className="px-2.5 py-1 rounded-full text-xs font-medium w-fit"
+                  style={{
+                    backgroundColor: `${THEME_COLORS[['paid', 'processing', 'completed', 'delivered'].includes(order.status.toLowerCase()) ? 'success' : 'danger']}15`,
+                    color: THEME_COLORS[['paid', 'processing', 'completed', 'delivered'].includes(order.status.toLowerCase()) ? 'success' : 'danger']
+                  }}
+                >
+                  {['paid', 'processing', 'completed', 'delivered'].includes(order.status.toLowerCase()) ? (
                     <span className="flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       PAID
@@ -219,16 +231,17 @@ export default function TrackPage() {
               </div>
             </CardHeader>
 
-            <CardContent className="grid gap-6 p-6">
+            <CardContent className="grid gap-4 sm:gap-6 p-4 sm:p-6">
               {/* Status Timeline */}
-              <div className="bg-card/50 rounded-xl p-6 border border-border/50">
+              <div className="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 sm:p-6 shadow-sm border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm overflow-x-auto">
                 <h3 className="font-medium text-sm text-muted-foreground mb-4">ORDER STATUS</h3>
                 {order.status.toLowerCase() === 'cancelled' ? (
+                  // Cancelled Order Status
                   <div className="relative">
                     <div className="absolute left-0 right-0 top-5 h-0.5 bg-destructive/20" />
                     <div className="relative flex flex-col items-center z-10">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-destructive">
-                        <XCircle className="w-5 h-5 text-destructive-foreground" />
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-destructive shadow-lg shadow-destructive/25">
+                        <XCircle className="w-5 h-5 text-white" />
                       </div>
                       <div className="mt-3 flex flex-col items-center gap-1">
                         <span className="text-sm font-medium text-destructive">CANCELLED</span>
@@ -239,41 +252,87 @@ export default function TrackPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="relative">
-                    <div className="absolute left-0 right-0 top-5 h-0.5 bg-border" />
-                    <div className="relative grid grid-cols-4 gap-0">
-                      {['Pending', 'Processing', 'Completed', 'Delivered'].map((status, index) => {
-                        const isActive = index <= ['pending', 'processing', 'completed', 'delivered']
-                          .indexOf(order.status.toLowerCase());
-                        const isCurrentStatus = order.status.toLowerCase() === status.toLowerCase();
+                  // Normal Order Status Timeline
+                  <div className="relative min-w-[600px]">
+                    <div className="absolute left-0 right-0 top-5 h-0.5 bg-slate-200 dark:bg-slate-700" />
+                    <div className="relative grid grid-cols-5 gap-0">
+                      {[
+                        {
+                          status: 'Pending',
+                          icon: Clock,
+                          color: THEME_COLORS.primary,
+                          isCompleted: ['pending', 'paid', 'processing', 'completed', 'delivered'].includes(order.status.toLowerCase())
+                        },
+                        {
+                          status: 'Payment',
+                          icon: CreditCard,
+                          color: THEME_COLORS.success,
+                          isCompleted: ['paid', 'processing', 'completed', 'delivered'].includes(order.status.toLowerCase())
+                        },
+                        {
+                          status: 'Processing',
+                          icon: Settings,
+                          color: THEME_COLORS.secondary,
+                          isCompleted: ['processing', 'completed', 'delivered'].includes(order.status.toLowerCase())
+                        },
+                        {
+                          status: 'Completed',
+                          icon: CheckCircle2,
+                          color: THEME_COLORS.tertiary,
+                          isCompleted: ['completed', 'delivered'].includes(order.status.toLowerCase())
+                        },
+                        {
+                          status: 'Delivered',
+                          icon: Truck,
+                          color: THEME_COLORS.success,
+                          isCompleted: ['delivered'].includes(order.status.toLowerCase())
+                        }
+                      ].map((step, index) => {
+                        const isCurrentStatus = order.status.toLowerCase() === step.status.toLowerCase() ||
+                          (step.status === 'Payment' && order.status.toLowerCase() === 'paid');
+                        const IconComponent = step.icon;
                         
                         return (
-                          <div key={status} className="relative flex flex-col items-center z-10">
+                          <div key={step.status} className="relative flex flex-col items-center z-10">
                             <div 
-                              className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200",
-                                isActive ? "bg-primary" : "bg-muted",
-                                isCurrentStatus && "ring-4 ring-primary/20"
-                              )}
+                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                step.isCompleted 
+                                  ? 'shadow-lg' 
+                                  : 'bg-slate-100 dark:bg-slate-700'
+                              } ${
+                                isCurrentStatus 
+                                  ? 'ring-4 ring-opacity-20'
+                                  : ''
+                              }`}
+                              style={{
+                                backgroundColor: step.isCompleted ? `${step.color}15` : '',
+                                boxShadow: step.isCompleted ? `0 8px 16px -4px ${step.color}25` : '',
+                                borderColor: step.color,
+                                ...(isCurrentStatus && { ringColor: step.color })
+                              }}
                             >
-                              {isActive ? (
-                                <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
-                              ) : (
-                                <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
-                              )}
+                              <IconComponent 
+                                className={`w-5 h-5 ${
+                                  step.isCompleted ? '' : 'text-slate-400'
+                                }`}
+                                style={{ color: step.isCompleted ? step.color : undefined }}
+                              />
                             </div>
                             
                             <div className="mt-3 flex flex-col items-center gap-1">
-                              <span className={cn(
-                                "text-sm font-medium",
-                                isCurrentStatus ? "text-primary" : 
-                                isActive ? "text-foreground" : "text-muted-foreground"
-                              )}>
-                                {status}
+                              <span className={`text-sm font-medium ${
+                                isCurrentStatus 
+                                  ? 'text-primary' 
+                                  : step.isCompleted 
+                                    ? 'text-slate-900 dark:text-slate-100' 
+                                    : 'text-slate-500 dark:text-slate-400'
+                              }`}
+                              style={{ color: isCurrentStatus ? step.color : undefined }}>
+                                {step.status}
                               </span>
                               {isCurrentStatus && (
                                 <span className="text-xs text-muted-foreground">
-                                  Current Status
+                                  {format(new Date(), 'MMM dd, yyyy')}
                                 </span>
                               )}
                             </div>
@@ -285,64 +344,57 @@ export default function TrackPage() {
                 )}
               </div>
 
-              {/* Services */}
-              <div className="grid md:grid-cols-2 gap-4">
+              {/* Order Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                {/* Services */}
                 {order.services.map((service, index) => (
                   <div 
                     key={index}
-                    className="bg-card/50 rounded-xl p-6 border border-border/50 hover:shadow-lg transition-all duration-200"
+                    className="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 space-y-3 sm:space-y-4"
+                    style={GLASS_EFFECT}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-xl bg-primary/10">
-                        <Package className="w-6 h-6 text-primary" />
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="p-2 rounded-lg"
+                        style={{
+                          background: `linear-gradient(135deg, ${THEME_COLORS.violet}15, ${THEME_COLORS.violet}25)`,
+                        }}
+                      >
+                        <Package className="w-5 h-5" style={{ color: THEME_COLORS.violet }} />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg text-foreground">{service.name}</h3>
-                        <Badge variant="outline" className="mt-1">
-                          ${formatDecimal(service.pricePerKg)}/kg
-                        </Badge>
+                      <div>
+                        <h3 className="font-medium text-sm sm:text-base">{service.name}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          ${formatDecimal(service.pricePerKg)} per kg
+                        </p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-                      <div className="flex items-center gap-2">
-                        <Scale className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-medium">{service.weight} kg</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm text-muted-foreground">Subtotal</span>
-                        <p className="font-semibold text-lg text-foreground">
-                          ${formatDecimal(service.subtotal)}
-                        </p>
-                      </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <Scale className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                      <span>{service.weight} kg</span>
+                      <span className="text-muted-foreground">•</span>
+                      <span>${formatDecimal(service.subtotal)}</span>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Total Amount */}
-              <div className="mt-6 p-6 rounded-xl bg-primary/5 border border-primary/20">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <span className="text-sm text-muted-foreground">Total Amount</span>
-                    <p className="text-3xl font-bold text-primary">
-                      ${formatDecimal(order.totalPrice)}
-                    </p>
-                  </div>
-                  {/* Removed Pay Now button */}
+              <div className="mt-2 sm:mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-base sm:text-lg font-medium">Total Amount</span>
+                  <span className="text-xl sm:text-2xl font-bold text-primary">
+                    ${formatDecimal(order.totalPrice)}
+                  </span>
                 </div>
               </div>
 
-              {/* Notes */}
+              {/* Notes if any */}
               {order.notes && (
-                <div className="mt-6 p-6 rounded-xl bg-muted/50 border border-border">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="p-2 rounded-lg bg-muted">
-                      <FileText className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <h3 className="font-semibold text-foreground">Additional Notes</h3>
-                  </div>
-                  <p className="text-muted-foreground leading-relaxed">{order.notes}</p>
+                <div className="mt-2 sm:mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                  <h3 className="font-medium text-sm sm:text-base mb-2">Notes</h3>
+                  <p className="text-sm text-muted-foreground">{order.notes}</p>
                 </div>
               )}
             </CardContent>

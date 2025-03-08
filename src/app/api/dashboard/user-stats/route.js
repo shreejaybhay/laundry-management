@@ -149,7 +149,18 @@ async function getUserStats(req) {
     // Get processing orders count
     const processingOrders = await Order.countDocuments({
       userId: new ObjectId(userId),
-      status: { $in: ["processing", "washing", "drying", "folding"] }
+      status: "pending", // Only count pending orders
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+
+    // Add debug logging
+    console.log('User Dashboard - Processing orders query result:', {
+      userId,
+      count: processingOrders,
+      dateRange: {
+        from: thirtyDaysAgo,
+        to: new Date()
+      }
     });
 
     // Debug log to verify dates

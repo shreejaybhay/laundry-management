@@ -27,11 +27,13 @@ export async function GET(req) {
 
     // Verify the session with Stripe and get payment details in parallel
     const [session, payment] = await Promise.all([
-      stripe.checkout.sessions.retrieve(sessionId),
+      stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ['payment_intent']
+      }),
       Payment.findOne({ 
         stripeSessionId: sessionId,
         orderId: orderId
-      }).exec()
+      }).populate('userId').exec()
     ]);
     
     if (!session || session.payment_status !== 'paid') {
@@ -47,8 +49,7 @@ export async function GET(req) {
       );
     }
 
-    // Find the user
-    const user = await User.findById(payment.userId);
+    const user = payment.userId;
     if (!user) {
       throw new Error('User not found');
     }
@@ -56,19 +57,29 @@ export async function GET(req) {
     if (payment.status !== 'PAID') {
       // Update payment and order status in parallel
       await Promise.all([
-        Payment.findByIdAndUpdate(payment._id, {
-          status: 'PAID',
-          stripePaymentId: session.payment_intent,
-          metadata: {
-            ...payment.metadata,
-            stripeSessionId: sessionId,
-            paymentCompleted: new Date().toISOString()
-          }
-        }),
-        Order.findByIdAndUpdate(orderId, {
-          status: 'processing',
-          paymentStatus: 'paid'
-        })
+        Payment.findByIdAndUpdate(
+          payment._id,
+          {
+            status: 'PAID',
+            stripePaymentId: session.payment_intent.id,
+            $set: {
+              'metadata.stripeSessionId': sessionId,
+              'metadata.paymentCompleted': new Date().toISOString(),
+              'metadata.paymentIntentStatus': session.payment_intent.status,
+              'metadata.paymentMethod': session.payment_intent.payment_method_types?.[0]
+            }
+          },
+          { new: true }
+        ),
+        Order.findByIdAndUpdate(
+          orderId,
+          {
+            status: 'processing',
+            paymentStatus: 'paid',
+            updatedAt: new Date()
+          },
+          { new: true }
+        )
       ]);
     }
 
@@ -85,6 +96,7 @@ export async function GET(req) {
     // Create the redirect URL with success parameter
     const redirectUrl = new URL(`${process.env.NEXT_PUBLIC_FRONTEND_URL}/dashboard/orders/${orderId}`);
     redirectUrl.searchParams.set('success', 'true');
+    redirectUrl.searchParams.set('session_id', sessionId);
 
     // Set both the auth token and a success message
     const response = new Response(null, {
@@ -93,7 +105,8 @@ export async function GET(req) {
         'Location': redirectUrl.toString(),
         'Set-Cookie': [
           `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`,
-          `payment_success=true; Path=/; Max-Age=60` // Short-lived cookie for success message
+          `payment_success=true; Path=/; Max-Age=60`, // Short-lived cookie for success message
+          `payment_session=${sessionId}; Path=/; Max-Age=60` // Short-lived cookie for session tracking
         ].join(', ')
       }
     });

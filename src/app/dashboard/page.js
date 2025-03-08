@@ -21,6 +21,7 @@ import {
   ShoppingBag,
   Activity,
   PackageCheck,
+  Package,
   Wallet,
   TrendingUp
 } from "lucide-react";
@@ -254,7 +255,7 @@ const DashboardPage = () => {
       const sanitizedData = {
         metrics: {
           totalOrders: data.metrics?.totalOrders || 0,
-          processing: data.metrics?.processing || 0,  // Use the processing count from API
+          processing: parseInt(data.metrics?.processing) || 0,  // Ensure it's parsed as integer
           revenue: data.metrics?.revenue || '0.00',
           activeUsers: data.metrics?.activeUsers || 0,
           orderGrowth: data.metrics?.orderGrowth || 0,
@@ -264,6 +265,9 @@ const DashboardPage = () => {
         revenueData: Array.isArray(data.revenueData) ? data.revenueData : [],
         serviceData: Array.isArray(data.serviceData) ? data.serviceData : []
       };
+
+      // Add validation log
+      console.log('Dashboard metrics:', sanitizedData.metrics);
 
       setDashboardData(sanitizedData);
 
@@ -291,60 +295,23 @@ const DashboardPage = () => {
     }
   }, [isAdmin]); // Add isAdmin as dependency
 
-  const renderMetrics = () => {
-    if (isAdmin) {
-      return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="Total Orders"
-            value={dashboardData.metrics.totalOrders}
-            icon={ShoppingCart}
-            percentage={dashboardData.metrics.orderGrowth}
-            loading={loading}
-            description="Total orders this month"
-          />
-          <StatsCard
-            title="Processing"
-            value={dashboardData.metrics.processing}
-            icon={Clock}
-            loading={loading}
-            description="Pending & processing orders" // Updated description
-          />
-          <StatsCard
-            title="Revenue"
-            value={dashboardData.metrics.revenue}
-            icon={DollarSign}
-            percentage={dashboardData.metrics.revenueGrowth}
-            loading={loading}
-            description="Monthly revenue"
-          />
-          <StatsCard
-            title="Active Users"
-            value={dashboardData.metrics.activeUsers}
-            icon={Users}
-            loading={loading}
-            description="Users this month"
-          />
-        </div>
-      );
-    }
-
+  const renderStats = () => {
     return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         <StatsCard
-          title="My Orders"
+          title="Orders"
           value={dashboardData.metrics.totalOrders}
-          icon={ShoppingCart}
+          icon={Package}
           percentage={dashboardData.metrics.orderGrowth}
           loading={loading}
           description="Your orders this month"
         />
         <StatsCard
           title="Processing"
-          value={dashboardData.metrics.processing}
+          value={dashboardData.metrics.processing || 0} // Ensure default value
           icon={Clock}
           loading={loading}
-          description="Your pending & processing orders" // Updated description
+          description="Pending orders" // Updated description to be more specific
         />
         <StatsCard
           title="Total Spent"
@@ -466,6 +433,18 @@ const DashboardPage = () => {
                     width={40}
                     tickFormatter={(value) => `$${value}`}
                     dx={8}
+                    ticks={(() => {
+                      // Get the actual data
+                      const maxRevenue = Math.max(...dashboardData.orderHistory.map(item => item.revenue));
+                      const step = maxRevenue / 4;
+                      return [
+                        0,
+                        Math.round(step),
+                        Math.round(step * 2),
+                        Math.round(step * 3),
+                        Math.round(maxRevenue)
+                      ];
+                    })()}
                   />
                   
                   <Tooltip
@@ -583,7 +562,7 @@ const DashboardPage = () => {
         </Button>
       </div>
 
-      {renderMetrics()}
+      {renderStats()}
 
       {!isAdmin && renderUserOrderHistory()}
       
@@ -702,6 +681,19 @@ const DashboardPage = () => {
                         dx={-10}
                         tick={{ fill: 'hsl(var(--foreground))' }}
                         width={45}
+                        domain={[0, 'auto']}
+                        ticks={(() => {
+                          const data = formatChartData(dashboardData.revenueData);
+                          const maxRevenue = Math.max(...data.map(item => item.revenue));
+                          const step = maxRevenue / 4;
+                          return [
+                            0,
+                            Math.round(step),
+                            Math.round(step * 2),
+                            Math.round(step * 3),
+                            Math.round(maxRevenue)
+                          ];
+                        })()}
                       />
                       <Tooltip
                         content={({ active, payload, label }) => {
