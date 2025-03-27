@@ -10,7 +10,7 @@ A modern web application for managing laundry services, built with **Next.js 14*
 
 ## 🌐 Live Demo
 
-🔗 **[View Live Demo](https://laundryhub-plum.vercel.app/dashboard/orders)**
+🔗 **[View Live Demo](https://laundryhub-plum.vercel.app)**
 
 > **Note**: The demo is hosted on Vercel and may take a few seconds to wake up on first load.
 

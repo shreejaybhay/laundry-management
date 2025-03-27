@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import {
   CheckCircle2, Clock, CreditCard, Banknote, ArrowLeft, MapPin,
   Package, Calendar, AlertCircle, Receipt, User, Truck, Settings, StickyNote,
-  Info, Scale, Home, XCircle, Building2, Wallet,
+  Info, Boxes, Home, XCircle, Building2, Wallet,
   Check,
   X
 } from 'lucide-react';
@@ -303,12 +303,12 @@ export default function OrderDetailsPage() {
                           <span className="text-sm font-medium">{order.services[0]?.name}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Weight</span>
-                          <span className="text-sm font-medium">{formatDecimal(order.services[0]?.weight)}kg</span>
+                          <span className="text-sm text-muted-foreground">Quantity</span>
+                          <span className="text-sm font-medium">{formatDecimal(order.services[0]?.weight)}qty</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Price per kg</span>
-                          <span className="text-sm font-medium">${formatDecimal(order.services[0]?.pricePerKg)}/kg</span>
+                          <span className="text-sm text-muted-foreground">Price per qty</span>
+                          <span className="text-sm font-medium">${formatDecimal(order.services[0]?.pricePerKg)}/qty</span>
                         </div>
                         <div className="flex justify-between items-center pt-2 border-t border-destructive/20">
                           <span className="text-sm font-medium text-muted-foreground">Total Amount (Cancelled)</span>
@@ -351,9 +351,9 @@ export default function OrderDetailsPage() {
                       <div>
                         <p className="text-sm font-medium" style={{ color: THEME_COLORS.secondary }}>{order.services[0]?.name}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                          <Scale className="w-3 h-3" style={{ color: THEME_COLORS.secondary }} />
-                          <span className="font-medium">{formatDecimal(order.services[0]?.weight)}kg</span>
-                          <span className="opacity-50">total weight</span>
+                          <Boxes className="w-3 h-3" style={{ color: THEME_COLORS.secondary }} />
+                          <span className="font-medium">{formatDecimal(order.services[0]?.weight)}qty</span>
+                          <span className="opacity-50">total quantity</span>
                         </div>
                       </div>
                     </div>
@@ -450,9 +450,9 @@ export default function OrderDetailsPage() {
                             <div>
                               <p className="text-sm font-medium" style={{ color: THEME_COLORS.violet }}>{service.name}</p>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                                <span className="font-medium">{formatDecimal(service.weight)}kg</span>
+                                <span className="font-medium">{formatDecimal(service.weight)}qty</span>
                                 <span className="opacity-50">•</span>
-                                <span>${formatDecimal(service.pricePerKg)}/kg</span>
+                                <span>${formatDecimal(service.pricePerKg)}/qty</span>
                               </div>
                             </div>
                           </div>
@@ -715,13 +715,18 @@ export default function OrderDetailsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted-foreground">Status</p>
                       <p className="text-sm" style={{ color: THEME_COLORS.tertiary }}>
-                        {order.status === 'pending' ? 'Awaiting Processing' : `Order ${order.status}`}
+                        {order.status === 'pending' ? 'Awaiting Processing' : 
+                         order.status === 'paid' ? 'Payment Received' :
+                         `Order ${order.status}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {order.status === 'pending' ? 'Will be processed soon' :
-                          order.status === 'processing' ? 'Being processed' :
-                            order.status === 'completed' ? 'Order completed' :
-                              order.status === 'delivered' ? 'Order delivered' : 'Status unknown'}
+                         order.status === 'paid' ? 'Order is confirmed and will be processed soon' :
+                         order.status === 'processing' ? 'Being processed' :
+                         order.status === 'completed' ? 'Order completed' :
+                         order.status === 'delivered' ? 'Order delivered' :
+                         order.status === 'cancelled' ? 'Order cancelled' : 
+                         'Processing order'}
                       </p>
                     </div>
                   </div>
@@ -779,22 +784,22 @@ export default function OrderDetailsPage() {
                   {/* Weight */}
                   <div className="p-3 rounded-xl" style={{ backgroundColor: `${THEME_COLORS.secondary}08` }}>
                     <div className="flex items-center gap-3">
-                      <Scale className="w-4 h-4" style={{ color: THEME_COLORS.secondary }} />
+                      <Boxes className="w-4 h-4" style={{ color: THEME_COLORS.secondary }} />
                       <div>
-                        <p className="text-xs text-muted-foreground">Total Weight</p>
+                        <p className="text-xs text-muted-foreground">Total Quantity</p>
                         <p className="text-sm font-medium mt-0.5" style={{ color: THEME_COLORS.secondary }}>
-                          {formatDecimal(order.services?.[0]?.weight || 0)} kg
+                          {formatDecimal(order.services?.[0]?.weight || 0)} qty
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Price Per KG */}
+                  {/* Price Per Qty */}
                   <div className="p-3 rounded-xl" style={{ backgroundColor: `${THEME_COLORS.tertiary}08` }}>
                     <div className="flex items-center gap-3">
                       <CreditCard className="w-4 h-4" style={{ color: THEME_COLORS.tertiary }} />
                       <div>
-                        <p className="text-xs text-muted-foreground">Price Per KG</p>
+                        <p className="text-xs text-muted-foreground">Price Per Qty</p>
                         <p className="text-sm font-medium mt-0.5" style={{ color: THEME_COLORS.tertiary }}>
                           ${formatDecimal(order.services?.[0]?.pricePerKg || 0)}
                         </p>
@@ -1126,3 +1131,7 @@ function AdminCODControls({ payment, onStatusUpdate }) {
     </div>
   );
 }
+
+
+
+

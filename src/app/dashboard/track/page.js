@@ -10,7 +10,8 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import {
   Package, Calendar, CreditCard, Scale, Search,
-  Receipt, ArrowRight, MapPin, Clock, CheckCircle2, XCircle, Settings, Truck
+  Receipt, ArrowRight, MapPin, Clock, CheckCircle2, XCircle, Settings, Truck,
+  Boxes
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatDecimal } from '@/lib/utils';
@@ -365,14 +366,14 @@ export default function TrackPage() {
                       <div>
                         <h3 className="font-medium text-sm sm:text-base">{service.name}</h3>
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                          ${formatDecimal(service.pricePerKg)} per kg
+                          ${formatDecimal(service.pricePerKg)} per qty
                         </p>
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-3 text-sm">
-                      <Scale className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                      <span>{service.weight} kg</span>
+                      <Boxes className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                      <span>{service.quantity} qty</span>
                       <span className="text-muted-foreground">•</span>
                       <span>${formatDecimal(service.subtotal)}</span>
                     </div>
@@ -404,4 +405,6 @@ export default function TrackPage() {
     </div>
   );
 }
+
+
 

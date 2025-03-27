@@ -406,7 +406,7 @@ export default function OrdersPage() {
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">Weight</span>
-            <span className="text-sm font-medium">{order.services[0]?.weight}kg</span>
+            <span className="text-sm font-medium">{order.services[0]?.weight}qty</span>
           </div>
         </div>
 
@@ -474,14 +474,14 @@ export default function OrdersPage() {
                     New Order
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Create New Order</DialogTitle>
                     <DialogDescription>
                       Fill in the details below to create a new order.
                     </DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={handleCreateOrder} className="space-y-4">
+                  <form onSubmit={handleCreateOrder} className="space-y-4 pb-2">
                     <div className="space-y-2">
                       <Label htmlFor="serviceId">Service</Label>
                       <Select name="serviceId" required>
@@ -499,7 +499,7 @@ export default function OrdersPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="weight">Weight (kg)</Label>
+                      <Label htmlFor="weight">Weight (qty)</Label>
                       <Input
                         type="number"
                         id="weight"
@@ -507,7 +507,7 @@ export default function OrdersPage() {
                         min="0.1"
                         step="0.1"
                         required
-                        placeholder="Enter weight in kg"
+                        placeholder="Enter weight in qty"
                       />
                     </div>
 
@@ -530,6 +530,7 @@ export default function OrdersPage() {
                         name="deliveryAddress"
                         required
                         placeholder="Enter delivery address"
+                        className="placeholder:leading-[1.6] min-h-[40px]"
                       />
                     </div>
 
@@ -539,6 +540,7 @@ export default function OrdersPage() {
                         id="notes"
                         name="notes"
                         placeholder="Add any special instructions or notes"
+                        className="placeholder:leading-[1.6] min-h-[80px]"
                       />
                     </div>
 
@@ -653,7 +655,7 @@ export default function OrdersPage() {
                   <TableHead>Order ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Service</TableHead>
-                  <TableHead>Weight</TableHead>
+                  <TableHead>Quantity</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -662,12 +664,12 @@ export default function OrdersPage() {
               <TableBody>
                 {filteredOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">#{order.id.slice(-8)}</TableCell>
+                    <TableCell className="font-mono">#{order.id.slice(-8)}</TableCell>
                     <TableCell>
                       {format(new Date(order.createdAt), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>{order.services[0]?.name}</TableCell>
-                    <TableCell>{order.services[0]?.weight}kg</TableCell>
+                    <TableCell>{order.services[0]?.weight}qty</TableCell>
                     <TableCell>${formatPrice(order.totalPrice)}</TableCell>
                     <TableCell>{getStatusBadge(order.status)}</TableCell>
                     <TableCell>
@@ -696,7 +698,7 @@ export default function OrdersPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold tracking-tight">
+                      <span className="text-xl font-mono tracking-tight">
                         #{order.id.slice(-8)}
                       </span>
                       <div className="scale-90 origin-left">
@@ -737,7 +739,7 @@ export default function OrdersPage() {
                     </div>
                     <div>
                       <span className="text-xs text-muted-foreground font-medium">Weight</span>
-                      <p className="text-sm font-medium">{order.services[0]?.weight}kg</p>
+                      <p className="text-sm font-medium">{order.services[0]?.weight}qty</p>
                     </div>
                   </div>
                 </div>
@@ -803,3 +805,9 @@ export default function OrdersPage() {
 function getStatusStyle(status) {
   return ORDER_STATUSES[status.toLowerCase()]?.color || ORDER_STATUSES.pending.color;
 }
+
+
+
+
+
+

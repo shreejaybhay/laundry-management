@@ -1,6 +1,7 @@
 import { adminAuth } from '@/middleware/adminAuth';
 import { apiResponse } from '@/lib/apiResponse';
 import Order from '@/models/Order';
+import Payment from '@/models/Payment';
 import connectDB from '@/lib/db';
 import mongoose from 'mongoose';
 
@@ -35,11 +36,15 @@ async function updateOrderStatus(request, context) {
       }, { status: 400 });
     }
 
-    // Add new validation: Check payment status before allowing delivered status
-    if (status === 'delivered' && order.paymentStatus === 'unpaid') {
-      return apiResponse({ 
-        error: 'Cannot mark order as delivered when payment is pending' 
-      }, { status: 400 });
+    // Modified validation: Check payment method and status
+    if (status === 'delivered') {
+      const payment = await Payment.findOne({ orderId: id });
+      // Allow delivery if it's COD or if payment is not pending
+      if (!payment || (payment.method !== 'COD' && order.paymentStatus === 'unpaid')) {
+        return apiResponse({ 
+          error: 'Cannot mark order as delivered when payment is pending' 
+        }, { status: 400 });
+      }
     }
 
     // If marking as delivered, ensure payment status is updated
@@ -50,6 +55,13 @@ async function updateOrderStatus(request, context) {
     
     if (status === 'delivered') {
       updateData.paymentStatus = 'paid';
+      // Update payment status for COD
+      const payment = await Payment.findOne({ orderId: id });
+      if (payment && payment.method === 'COD') {
+        await Payment.findByIdAndUpdate(payment._id, {
+          status: 'PAID'
+        });
+      }
     }
 
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -75,3 +87,5 @@ async function updateOrderStatus(request, context) {
 }
 
 export const PUT = adminAuth(updateOrderStatus);
+
+

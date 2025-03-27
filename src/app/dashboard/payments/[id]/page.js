@@ -27,7 +27,8 @@ import {
   Mail,
   Settings,
   Download,
-  Banknote
+  Banknote,
+  XCircle
 } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from '@/components/ui/badge';
@@ -705,7 +706,25 @@ export default function PaymentDetailsPage({ params }) {
                           color: THEME_COLORS.secondary,
                         }}
                       >
-                        <Package className="w-5 h-5" />
+                        {/* Dynamic icon based on status */}
+                        {(() => {
+                          switch (order.status?.toLowerCase()) {
+                            case 'completed':
+                              return <CheckCircle2 className="w-5 h-5" />;
+                            case 'processing':
+                              return <Settings className="w-5 h-5 animate-spin" />;
+                            case 'delivered':
+                              return <Truck className="w-5 h-5" />;
+                            case 'cancelled':
+                              return <XCircle className="w-5 h-5" />;
+                            case 'pending':
+                              return <Clock className="w-5 h-5" />;
+                            case 'paid':
+                              return <Package className="w-5 h-5" />;
+                            default:
+                              return <AlertCircle className="w-5 h-5" />;
+                          }
+                        })()}
                       </div>
                       <div>
                         <p className="font-medium" style={{ color: THEME_COLORS.secondary }}>
@@ -720,13 +739,25 @@ export default function PaymentDetailsPage({ params }) {
                         color: getOrderStatusColor(order.status),
                       }}
                     >
-                      {order.status === "completed" ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : order.status === "processing" ? (
-                        <Clock className="w-4 h-4 animate-pulse" />
-                      ) : (
-                        <Clock className="w-4 h-4" />
-                      )}
+                      {/* Dynamic icon based on status */}
+                      {(() => {
+                        switch (order.status?.toLowerCase()) {
+                          case 'completed':
+                            return <CheckCircle2 className="w-4 h-4" />;
+                          case 'processing':
+                            return <Settings className="w-4 h-4 animate-spin" />;
+                          case 'delivered':
+                            return <Truck className="w-4 h-4" />;
+                          case 'cancelled':
+                            return <XCircle className="w-4 h-4" />;
+                          case 'pending':
+                            return <Clock className="w-4 h-4" />;
+                          case 'paid':
+                            return <Package className="w-4 h-4" />;
+                          default:
+                            return <AlertCircle className="w-4 h-4" />;
+                        }
+                      })()}
                       {order.status.toUpperCase()}
                     </div>
                   </div>
@@ -784,6 +815,7 @@ export default function PaymentDetailsPage({ params }) {
     </div>
   )
 }
+
 
 
 
