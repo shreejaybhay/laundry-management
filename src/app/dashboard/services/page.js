@@ -219,7 +219,7 @@ export default function ServicesPage() {
     const [formData, setFormData] = useState({
       name: service?.name || "",
       description: service?.description || "",
-      pricePerQty: service?.pricePerKg?.$numberDecimal || service?.pricePerKg || "",
+      pricePerKg: service?.pricePerKg?.$numberDecimal || service?.pricePerKg || "", // Changed from pricePerQty
       estimatedTime: service?.estimatedTime || "",
       isActive: service?.isActive ?? true,
     });
@@ -238,9 +238,9 @@ export default function ServicesPage() {
         // Validate required fields
         if (!formData.name.trim()) throw new Error("Service name is required");
         if (!formData.description.trim()) throw new Error("Description is required");
-        if (!formData.pricePerQty || formData.pricePerQty <= 0) throw new Error("Price must be greater than 0");
+        if (!formData.pricePerKg || formData.pricePerKg <= 0) throw new Error("Price must be greater than 0"); // Changed from pricePerQty
         if (!formData.estimatedTime || formData.estimatedTime < 1) throw new Error("Estimated time must be at least 1 hour");
-        if (!validatePrice(formData.pricePerQty)) throw new Error("Price must be a valid number with maximum 2 decimal places");
+        if (!validatePrice(formData.pricePerKg)) throw new Error("Price must be a valid number with maximum 2 decimal places"); // Changed from pricePerQty
 
         // Send the exact formData without any transformations
         await onSubmit(formData);
@@ -280,15 +280,15 @@ export default function ServicesPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="pricePerQty">Price per qty</Label>
+          <Label htmlFor="pricePerKg">Price per qty</Label>
           <Input
-            id="pricePerQty"
+            id="pricePerKg"
             type="number"
             step="0.01"
             min="0"
-            value={formData.pricePerQty}
-            onChange={(e) => setFormData({ ...formData, pricePerQty: e.target.value })}
-            placeholder="0.00"
+            value={formData.pricePerKg}
+            onChange={(e) => setFormData({ ...formData, pricePerKg: e.target.value })}
+            placeholder="Enter price per qty"
             required
           />
         </div>
@@ -527,4 +527,6 @@ export default function ServicesPage() {
     </div>
   );
 }
+
+
 

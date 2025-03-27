@@ -37,10 +37,16 @@ async function createService(req) {
     
     const data = await req.json();
     
-    // Convert price to Decimal128
-    if (data.pricePerKg) {
-      data.pricePerKg = mongoose.Types.Decimal128.fromString(data.pricePerKg.toString());
+    // Ensure pricePerKg is present and valid
+    if (!data.pricePerKg) {
+      return apiResponse({ 
+        error: 'Price per kg is required',
+        details: { pricePerKg: 'Please provide a price per kg' }
+      }, { status: 400 });
     }
+
+    // Convert price to Decimal128
+    data.pricePerKg = mongoose.Types.Decimal128.fromString(data.pricePerKg.toString());
 
     const newService = await Service.create(data);
 
@@ -49,7 +55,7 @@ async function createService(req) {
       _id: newService._id,
       name: newService.name,
       description: newService.description,
-      pricePerKg: newService.pricePerKg.toString(), // Convert Decimal128 to string
+      pricePerKg: newService.pricePerKg.toString(),
       estimatedTime: newService.estimatedTime,
       isActive: Boolean(newService.isActive),
       createdAt: newService.createdAt
@@ -60,9 +66,10 @@ async function createService(req) {
     console.error('Create service error:', error);
     return apiResponse({ 
       error: error.message || 'Failed to create service',
-      details: error.errors // Include validation errors if any
+      details: error.errors
     }, { status: 400 });
   }
 }
 
 export const POST = adminAuth(createService);
+
